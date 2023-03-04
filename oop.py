@@ -1,41 +1,101 @@
-# Определяем класс ProceduralLanguage для процедурных языков программирования
-class ProceduralLanguage:
-    def __init__(self, name, year, is_abstract_type_supported):
-        self.name = name
-        self.year = year
-        self.is_abstract_type_supported = is_abstract_type_supported
+import sys
+from enum import Enum
 
+class LanguageType(Enum):
+    PROCEDURAL = 1
+    OBJECT_ORIENTED = 2
 
-# Определяем класс InheritanceType для типов наследования
-class InheritanceType:
-    Single = "Single"
-    Multiple = "Multiple"
+class DataType(Enum):
+    BOOLEAN = 11
+    ABSTRACT = 22
 
+class InheritanceType(Enum):
+    SINGLE = 1
+    MULTIPLE = 2
 
-# Определяем класс ObjectOrientedLanguage для объектно-ориентированных языков программирования
-class ObjectOrientedLanguage:
-    def __init__(self, name, year, is_abstract_type_supported, inheritance_type, interfaces):
-        self.name = name
-        self.year = year
-        self.is_abstract_type_supported = is_abstract_type_supported
-        self.inheritance_type = inheritance_type
-        self.interfaces = interfaces
+class Lang:
+    def __init__(self, language_type):
+        self.title = ''
+        self.language_type = language_type
+        self.data_type = None
+        self.inheritance_type = None
+        self.year = None
 
+    def get_from_file(self, file):
+        self.title = file.readline()
+        if self.language_type == LanguageType.PROCEDURAL:
+            self.data_type = DataType(int(file.readline()))
+        if self.language_type == LanguageType.OBJECT_ORIENTED:
+            self.inheritance_type = InheritanceType(int(file.readline()))
+        self.year = int(file.readline())
 
-# Создаем объекты процедурных языков программирования
-c = ProceduralLanguage("C", 1972, False)
-pascal = ProceduralLanguage("Pascal", 1970, True)
-fortran = ProceduralLanguage("FORTRAN", 1957, False)
-cobol = ProceduralLanguage("COBOL", 1959, False)
-basic = ProceduralLanguage("BASIC", 1964, True)
+    def record_to_file(self, file):
+        file.write(self.title)
+        file.write(f"Год: {self.year}\n")
+        if self.language_type == LanguageType.PROCEDURAL:
+            file.write("Процедурный язык программирования\n")
+            if self.data_type == DataType.BOOLEAN:
+                file.write("Булевая величина\n")
+            if self.data_type == DataType.ABSTRACT:
+                file.write("Абстрактные типы данных отсутствуют\n")
+        if self.language_type == LanguageType.OBJECT_ORIENTED:
+            file.write("Объектно-ориентированный язык программирования\n")
+            if self.inheritance_type == InheritanceType.SINGLE:
+                file.write("Одинарное наследование\n")
+            if self.inheritance_type == InheritanceType.MULTIPLE:
+                file.write("Множественное наследование\n")
+            file.write("Интерфейсы: есть\n")
+        file.write('\n')
 
-# Создаем объекты объектно-ориентированных языков программирования
-java = ObjectOrientedLanguage("Java", 1995, True, InheritanceType.Multiple, ["Java SE", "Java EE"])
-cpp = ObjectOrientedLanguage("C++", 1983, True, InheritanceType.Multiple, ["STL", "Boost"])
-python = ObjectOrientedLanguage("Python", 1991, True, InheritanceType.Multiple, ["ABC", "DEF"])
-ruby = ObjectOrientedLanguage("Ruby", 1995, True, InheritanceType.Single, ["Ruby on Rails"])
-swift = ObjectOrientedLanguage("Swift", 2014, True, InheritanceType.Multiple, ["UIKit", "Foundation"])
+class Array:
+    def __init__(self, max_size):
+        self.size = 0
+        self.content = []
+        self.max_size = max_size
 
-# Тестирование
-print(c.name, c.year, c.is_abstract_type_supported)
-print(java.name, java.year, java.is_abstract_type_supported, java.inheritance_type, java.interfaces)
+    def append(self, element):
+        if self.size < self.max_size:
+            self.size += 1
+            self.content.append(element)
+        else:
+            print("Массив уже заполнен! Элемент не будет записан")
+
+    def clear(self):
+        self.size = 0
+        self.data = []
+
+    def fill(self, file):
+        language_type = LanguageType(int(file.readline()))
+        while language_type != '' and language_type != '\n':
+            lang = Lang(language_type)
+            lang.get_from_file(file)
+            self.append(lang)
+            language_type_str = file.readline().strip()
+            if not language_type_str:
+                break
+            language_type = LanguageType(int(language_type_str))
+            # language_type = LanguageType(int(file.readline().strip()))
+
+    def record_to_file(self, file):
+        file.write(f"Записано {self.size} языков\n\n")
+        for i in range(self.size):
+            self.content[i].record_to_file(file)
+
+if len(sys.argv) != 3:
+    print('\nФайлы ввода/вывода не выбраны! Будут использованы стандартные in.txt и out.txt\n')
+    infile = 'in.txt'
+    outfile = 'out.txt'
+else:
+    infile = sys.argv[1]
+    outfile = sys.argv[2]
+
+infile = open(infile, 'r', encoding="utf-8")
+a = Array(2)
+a.fill(infile)
+print(f"В контейнер записано {a.size} языков\n")
+infile.close()
+
+outfile = open(outfile, 'w', encoding = "utf-8")
+a.record_to_file(outfile)
+outfile.close()
+a.clear()
