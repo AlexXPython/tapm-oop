@@ -20,6 +20,8 @@ class Lang:
         self.data_type = None
         self.inheritance_type = None
         self.year = None
+        self.next = None
+        self.prev = None
 
     def get_from_file(self, file):
         self.title = file.readline()
@@ -47,22 +49,26 @@ class Lang:
             file.write("Интерфейсы: есть\n")
         file.write('\n')
 
-class Array:
-    def __init__(self, max_size):
+class LinkedList:
+    def __init__(self):
+        self.head = None
+        self.tail = None
         self.size = 0
-        self.content = []
-        self.max_size = max_size
 
     def append(self, element):
-        if self.size < self.max_size:
-            self.size += 1
-            self.content.append(element)
+        if self.head is None:
+            self.head = element
+            self.tail = element
         else:
-            print("Массив уже заполнен! Элемент не будет записан")
+            element.prev = self.tail
+            self.tail.next = element
+            self.tail = element
+        self.size += 1
 
     def clear(self):
+        self.head = None
+        self.tail = None
         self.size = 0
-        self.data = []
 
     def fill(self, file):
         language_type = LanguageType(int(file.readline()))
@@ -74,12 +80,13 @@ class Array:
             if not language_type_str:
                 break
             language_type = LanguageType(int(language_type_str))
-            # language_type = LanguageType(int(file.readline().strip()))
 
     def record_to_file(self, file):
         file.write(f"Записано {self.size} языков\n\n")
-        for i in range(self.size):
-            self.content[i].record_to_file(file)
+        cur = self.head
+        while cur is not None:
+            cur.record_to_file(file)
+            cur = cur.next
 
 if len(sys.argv) != 3:
     print('\nФайлы ввода/вывода не выбраны! Будут использованы стандартные in.txt и out.txt\n')
@@ -90,12 +97,12 @@ else:
     outfile = sys.argv[2]
 
 infile = open(infile, 'r', encoding="utf-8")
-a = Array(2)
+a = LinkedList(20)
 a.fill(infile)
 print(f"В контейнер записано {a.size} языков\n")
 infile.close()
 
-outfile = open(outfile, 'w', encoding = "utf-8")
+outfile = open(outfile, 'w', encoding="utf-8")
 a.record_to_file(outfile)
 outfile.close()
 a.clear()
